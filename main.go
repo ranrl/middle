@@ -19,8 +19,10 @@ func main() {
 	// httprouter 基础上实现中间件
 	router := app.NewRouter()
 	router.Use(timeMiddle)
+	router.Use(LoginMiddle)
 	router.Add("GET", "/", hello)
 	router.Add("GET", "/user/:name", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		log.Println("print fe")
 		w.Write([]byte("user name:" + p.ByName("name")))
 	})
 	err := router.Run(":8080")
@@ -61,11 +63,19 @@ func main() {
 func timeMiddle(next httprouter.Handle) httprouter.Handle {
 	return httprouter.Handle(func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		timeStart := time.Now()
+		log.Println("timeStart")
 		next(w, r, p)
 		timeElapsed := time.Since(timeStart)
 		log.Println(timeElapsed)
 	})
 }
+func LoginMiddle(next httprouter.Handle) httprouter.Handle {
+	return httprouter.Handle(func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		log.Println("login success")
+		next(w, r, p)
+	})
+}
 func hello(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	log.Println("print fe")
 	w.Write([]byte("hello"))
 }
